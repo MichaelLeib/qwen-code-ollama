@@ -16,6 +16,7 @@ import {
 import { createCodeAssistContentGenerator } from '../code_assist/codeAssist.js';
 import { DEFAULT_GEMINI_MODEL } from '../config/models.js';
 import { Config } from '../config/config.js';
+import { getEffectiveOllamaSettings } from '../config/ollamaSettings.js';
 import { getEffectiveModel } from './modelCheck.js';
 import { UserTierId } from '../code_assist/types.js';
 
@@ -125,9 +126,11 @@ export async function createContentGeneratorConfig(
     return contentGeneratorConfig;
   }
 
-  if (authType === AuthType.USE_OLLAMA && ollamaEndpoint) {
-    contentGeneratorConfig.ollamaEndpoint = ollamaEndpoint;
-    contentGeneratorConfig.model = process.env.OLLAMA_MODEL || model || 'llama3.2:latest';
+  if (authType === AuthType.USE_OLLAMA) {
+    // Load saved settings and use environment variables as overrides
+    const ollamaSettings = getEffectiveOllamaSettings();
+    contentGeneratorConfig.ollamaEndpoint = ollamaEndpoint || ollamaSettings.endpoint;
+    contentGeneratorConfig.model = process.env.OLLAMA_MODEL || model || ollamaSettings.model;
 
     return contentGeneratorConfig;
   }

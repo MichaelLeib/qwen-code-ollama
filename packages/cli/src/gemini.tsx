@@ -103,6 +103,18 @@ export async function main() {
   }
 
   const argv = await parseArguments();
+  
+  // Handle Ollama settings management commands
+  if (argv.ollamaSettings) {
+    const { handleOllamaSettingsCommand } = await import('./config/ollamaSettingsManager.js');
+    handleOllamaSettingsCommand(argv.ollamaSettings);
+    
+    // For 'edit' command, continue to launch the interactive CLI
+    if (argv.ollamaSettings !== 'edit') {
+      process.exit(0);
+    }
+  }
+  
   const extensions = loadExtensions(workspaceRoot);
   const config = await loadCliConfig(
     settings.merged,

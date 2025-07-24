@@ -33,6 +33,13 @@ export class OllamaContentGenerator implements ContentGenerator {
     // Create service with default max retries
     const maxRetries = 3;
     this.ollamaService = new OllamaService(maxRetries);
+    
+    // Ensure service uses the same endpoint and model as the content generator config
+    // This ensures consistency if settings were overridden by environment variables
+    this.ollamaService.updateSettings({ 
+      endpoint,
+      model 
+    });
   }
 
   async generateContent(

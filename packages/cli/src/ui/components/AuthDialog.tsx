@@ -17,6 +17,7 @@ import {
 } from '../../config/auth.js';
 import { OllamaConfigPrompt } from './OllamaConfigPrompt.js';
 import { OllamaSettingsScreen } from './OllamaSettingsScreen.js';
+import { OllamaSettings } from '../../config/ollamaSettings.js';
 
 interface AuthDialogProps {
   onSelect: (authMethod: AuthType | undefined, scope: SettingScope) => void;
@@ -102,9 +103,12 @@ export function AuthDialog({
     setErrorMessage('Ollama endpoint is required to use Ollama.');
   };
 
-  const handleOllamaSettingsComplete = () => {
+  const handleOllamaSettingsComplete = (settings: OllamaSettings) => {
     setShowOllamaSettingsScreen(false);
     setErrorMessage(null);
+    // Store settings in auth config for immediate use
+    setOllamaEndpoint(settings.endpoint);
+    setOllamaModel(settings.model);
     onSelect(AuthType.USE_OLLAMA, SettingScope.User);
   };
 

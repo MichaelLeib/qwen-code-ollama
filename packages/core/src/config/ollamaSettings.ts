@@ -39,6 +39,9 @@ const getSettingsPath = (): string => {
   return join(qwenDir, 'ollama-settings.json');
 };
 
+// Export settings path for external use
+export const getOllamaSettingsPath = (): string => getSettingsPath();
+
 // Ensure settings directory exists
 const ensureSettingsDirectory = (): void => {
   const settingsPath = getSettingsPath();

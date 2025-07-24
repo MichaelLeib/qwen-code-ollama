@@ -57,6 +57,7 @@ export interface CliArgs {
   ideMode: boolean | undefined;
   ollamaEndpoint: string | undefined;
   ollamaModel: string | undefined;
+  ollamaSettings: string | undefined;
 }
 
 export async function parseArguments(): Promise<CliArgs> {
@@ -191,6 +192,11 @@ export async function parseArguments(): Promise<CliArgs> {
       type: 'string',
       description: 'Ollama model to use for generation',
       default: process.env.OLLAMA_MODEL,
+    })
+    .option('ollama-settings', {
+      type: 'string',
+      choices: ['show', 'reset', 'edit'],
+      description: 'Manage Ollama settings (show, reset, or edit)',
     })
 
     .version(await getCliVersion()) // This will enable the --version flag based on package.json
