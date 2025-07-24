@@ -45,7 +45,23 @@ export const validateAuthMethod = (authMethod: string): string | null => {
     return null;
   }
 
+  if (authMethod === AuthType.USE_OLLAMA) {
+    if (!process.env.OLLAMA_ENDPOINT) {
+      return 'OLLAMA_ENDPOINT environment variable not found. You can configure it interactively or add it to your .env file.';
+    }
+    return validateOllamaEndpoint(process.env.OLLAMA_ENDPOINT);
+  }
+
   return 'Invalid auth method selected.';
+};
+
+export const validateOllamaEndpoint = (endpoint: string): string | null => {
+  try {
+    new URL(endpoint);
+    return null;
+  } catch {
+    return 'Invalid Ollama endpoint URL format';
+  }
 };
 
 export const setOpenAIApiKey = (apiKey: string): void => {
@@ -58,4 +74,12 @@ export const setOpenAIBaseUrl = (baseUrl: string): void => {
 
 export const setOpenAIModel = (model: string): void => {
   process.env.OPENAI_MODEL = model;
+};
+
+export const setOllamaEndpoint = (endpoint: string): void => {
+  process.env.OLLAMA_ENDPOINT = endpoint;
+};
+
+export const setOllamaModel = (model: string): void => {
+  process.env.OLLAMA_MODEL = model;
 };

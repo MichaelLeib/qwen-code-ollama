@@ -12,11 +12,11 @@ import { LoadedSettings, SettingScope } from '../../config/settings.js';
 import { AuthType } from '@qwen-code/qwen-code-core';
 import {
   validateAuthMethod,
-  setOpenAIApiKey,
-  setOpenAIBaseUrl,
-  setOpenAIModel,
+  setOllamaEndpoint,
+  setOllamaModel,
 } from '../../config/auth.js';
-import { OpenAIKeyPrompt } from './OpenAIKeyPrompt.js';
+import { OllamaConfigPrompt } from './OllamaConfigPrompt.js';
+import { OllamaSettingsScreen } from './OllamaSettingsScreen.js';
 
 interface AuthDialogProps {
   onSelect: (authMethod: AuthType | undefined, scope: SettingScope) => void;
@@ -44,8 +44,9 @@ export function AuthDialog({
   const [errorMessage, setErrorMessage] = useState<string | null>(
     initialErrorMessage || null,
   );
-  const [showOpenAIKeyPrompt, setShowOpenAIKeyPrompt] = useState(false);
-  const items = [{ label: 'OpenAI', value: AuthType.USE_OPENAI }];
+  const [showOllamaConfigPrompt, setShowOllamaConfigPrompt] = useState(false);
+  const [showOllamaSettingsScreen, setShowOllamaSettingsScreen] = useState(false);
+  const items = [{ label: 'Ollama', value: AuthType.USE_OLLAMA }];
 
   const initialAuthIndex = Math.max(
     0,
@@ -70,40 +71,51 @@ export function AuthDialog({
   );
 
   const handleAuthSelect = (authMethod: AuthType) => {
+    if (authMethod === AuthType.USE_OLLAMA) {
+      // Always show settings screen for Ollama
+      setShowOllamaSettingsScreen(true);
+      setErrorMessage(null);
+      return;
+    }
+    
     const error = validateAuthMethod(authMethod);
     if (error) {
-      if (authMethod === AuthType.USE_OPENAI && !process.env.OPENAI_API_KEY) {
-        setShowOpenAIKeyPrompt(true);
-        setErrorMessage(null);
-      } else {
-        setErrorMessage(error);
-      }
+      setErrorMessage(error);
     } else {
       setErrorMessage(null);
       onSelect(authMethod, SettingScope.User);
     }
   };
 
-  const handleOpenAIKeySubmit = (
-    apiKey: string,
-    baseUrl: string,
+  const handleOllamaConfigSubmit = (
+    endpoint: string,
     model: string,
   ) => {
-    setOpenAIApiKey(apiKey);
-    setOpenAIBaseUrl(baseUrl);
-    setOpenAIModel(model);
-    setShowOpenAIKeyPrompt(false);
-    onSelect(AuthType.USE_OPENAI, SettingScope.User);
+    setOllamaEndpoint(endpoint);
+    setOllamaModel(model);
+    setShowOllamaConfigPrompt(false);
+    onSelect(AuthType.USE_OLLAMA, SettingScope.User);
   };
 
-  const handleOpenAIKeyCancel = () => {
-    setShowOpenAIKeyPrompt(false);
-    setErrorMessage('OpenAI API key is required to use OpenAI authentication.');
+  const handleOllamaConfigCancel = () => {
+    setShowOllamaConfigPrompt(false);
+    setErrorMessage('Ollama endpoint is required to use Ollama.');
+  };
+
+  const handleOllamaSettingsComplete = () => {
+    setShowOllamaSettingsScreen(false);
+    setErrorMessage(null);
+    onSelect(AuthType.USE_OLLAMA, SettingScope.User);
+  };
+
+  const handleOllamaSettingsCancel = () => {
+    setShowOllamaSettingsScreen(false);
+    setErrorMessage('Ollama configuration is required to continue.');
   };
 
   useInput((_input, key) => {
-    // 当显示 OpenAIKeyPrompt 时，不处理输入事件
-    if (showOpenAIKeyPrompt) {
+    // Don't handle input when showing config screens
+    if (showOllamaConfigPrompt || showOllamaSettingsScreen) {
       return;
     }
 
@@ -124,11 +136,20 @@ export function AuthDialog({
     }
   });
 
-  if (showOpenAIKeyPrompt) {
+  if (showOllamaSettingsScreen) {
     return (
-      <OpenAIKeyPrompt
-        onSubmit={handleOpenAIKeySubmit}
-        onCancel={handleOpenAIKeyCancel}
+      <OllamaSettingsScreen
+        onComplete={handleOllamaSettingsComplete}
+        onCancel={handleOllamaSettingsCancel}
+      />
+    );
+  }
+
+  if (showOllamaConfigPrompt) {
+    return (
+      <OllamaConfigPrompt
+        onSubmit={handleOllamaConfigSubmit}
+        onCancel={handleOllamaConfigCancel}
       />
     );
   }
@@ -141,9 +162,14 @@ export function AuthDialog({
       padding={1}
       width="100%"
     >
-      <Text bold>Get started</Text>
+      <Text bold>Welcome to Qwen Code</Text>
       <Box marginTop={1}>
-        <Text>How would you like to authenticate for this project?</Text>
+        <Text>Configure your local Ollama server to get started with AI-powered coding.</Text>
+      </Box>
+      <Box marginTop={1}>
+        <Text color={Colors.Gray}>
+          Ollama runs large language models locally on your machine, ensuring privacy and offline access.
+        </Text>
       </Box>
       <Box marginTop={1}>
         <RadioButtonSelect
@@ -159,10 +185,15 @@ export function AuthDialog({
         </Box>
       )}
       <Box marginTop={1}>
-        <Text color={Colors.AccentPurple}>(Use Enter to Set Auth)</Text>
+        <Text color={Colors.AccentPurple}>💡 Press Enter to configure Ollama</Text>
       </Box>
       <Box marginTop={1}>
-        <Text>Terms of Services and Privacy Notice for Qwen Code</Text>
+        <Text color={Colors.Gray}>
+          New to Ollama? Visit ollama.ai for installation instructions.
+        </Text>
+      </Box>
+      <Box marginTop={1}>
+        <Text>Terms of Service and Privacy Notice for Qwen Code</Text>
       </Box>
       <Box marginTop={1}>
         <Text color={Colors.AccentBlue}>

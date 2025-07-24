@@ -2,6 +2,60 @@
 
 The Qwen Code CLI supports multiple authentication methods. On initial startup you'll need to configure **one** of the following authentication methods:
 
+## Recommended: Local Ollama
+
+**Ollama** provides local AI inference for privacy and offline access. This is the recommended method for most users.
+
+### Quick Setup
+
+1. **Install Ollama:**
+   ```bash
+   # macOS/Linux
+   curl -fsSL https://ollama.ai/install.sh | sh
+   
+   # Or visit https://ollama.ai/download
+   ```
+
+2. **Start Ollama:**
+   ```bash
+   ollama serve
+   ```
+
+3. **Install a model:**
+   ```bash
+   # Recommended for coding tasks
+   ollama pull qwen3-coder:latest
+   
+   # Other popular options
+   ollama pull llama3.2:latest
+   ollama pull codellama:latest
+   ```
+
+4. **Run Qwen Code:**
+   ```bash
+   qwen
+   # Follow the interactive setup to configure your Ollama endpoint and select a model
+   ```
+
+### Environment Variables
+
+You can pre-configure Ollama settings:
+
+```bash
+export OLLAMA_ENDPOINT="http://localhost:11434"
+export OLLAMA_MODEL="qwen3-coder:latest"
+```
+
+### Command Line Options
+
+```bash
+qwen --ollama-endpoint http://localhost:11434 --ollama-model qwen3-coder:latest
+```
+
+For detailed setup instructions, see the [Ollama Setup Guide](../ollama-setup.md).
+
+## Cloud API Options
+
 1.  **Login with Google (Gemini Code Assist):**
     - Use this option to log in with your google account.
     - During initial startup, Gemini CLI will direct you to a webpage for authentication. Once authenticated, your credentials will be cached locally so the web login can be skipped on subsequent runs.

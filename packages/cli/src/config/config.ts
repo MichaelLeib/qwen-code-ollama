@@ -13,7 +13,6 @@ import {
   setGeminiMdFilename as setServerGeminiMdFilename,
   getCurrentGeminiMdFilename,
   ApprovalMode,
-  DEFAULT_GEMINI_MODEL,
   DEFAULT_GEMINI_EMBEDDING_MODEL,
   FileDiscoveryService,
   TelemetryTarget,
@@ -56,9 +55,8 @@ export interface CliArgs {
   extensions: string[] | undefined;
   listExtensions: boolean | undefined;
   ideMode: boolean | undefined;
-  openaiLogging: boolean | undefined;
-  openaiApiKey: string | undefined;
-  openaiBaseUrl: string | undefined;
+  ollamaEndpoint: string | undefined;
+  ollamaModel: string | undefined;
 }
 
 export async function parseArguments(): Promise<CliArgs> {
@@ -72,7 +70,7 @@ export async function parseArguments(): Promise<CliArgs> {
       alias: 'm',
       type: 'string',
       description: `Model`,
-      default: process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+      default: process.env.OLLAMA_MODEL || 'llama3.2:latest',
     })
     .option('prompt', {
       alias: 'p',
@@ -184,18 +182,15 @@ export async function parseArguments(): Promise<CliArgs> {
       type: 'boolean',
       description: 'Run in IDE mode?',
     })
-    .option('openai-logging', {
-      type: 'boolean',
-      description:
-        'Enable logging of OpenAI API calls for debugging and analysis',
-    })
-    .option('openai-api-key', {
+    .option('ollama-endpoint', {
       type: 'string',
-      description: 'OpenAI API key to use for authentication',
+      description: 'Ollama server endpoint URL',
+      default: process.env.OLLAMA_ENDPOINT || 'http://localhost:11434',
     })
-    .option('openai-base-url', {
+    .option('ollama-model', {
       type: 'string',
-      description: 'OpenAI base URL (for custom endpoints)',
+      description: 'Ollama model to use for generation',
+      default: process.env.OLLAMA_MODEL,
     })
 
     .version(await getCliVersion()) // This will enable the --version flag based on package.json
@@ -262,14 +257,14 @@ export async function loadCliConfig(
     argv.extensions || [],
   );
 
-  // Handle OpenAI API key from command line
-  if (argv.openaiApiKey) {
-    process.env.OPENAI_API_KEY = argv.openaiApiKey;
+  // Handle Ollama endpoint from command line
+  if (argv.ollamaEndpoint) {
+    process.env.OLLAMA_ENDPOINT = argv.ollamaEndpoint;
   }
 
-  // Handle OpenAI base URL from command line
-  if (argv.openaiBaseUrl) {
-    process.env.OPENAI_BASE_URL = argv.openaiBaseUrl;
+  // Handle Ollama model from command line
+  if (argv.ollamaModel) {
+    process.env.OLLAMA_MODEL = argv.ollamaModel;
   }
 
   // Set the context filename in the server's memoryTool module BEFORE loading memory
@@ -389,10 +384,6 @@ export async function loadCliConfig(
     })),
     noBrowser: !!process.env.NO_BROWSER,
     ideMode,
-    enableOpenAILogging:
-      (typeof argv.openaiLogging === 'undefined'
-        ? settings.enableOpenAILogging
-        : argv.openaiLogging) ?? false,
     sampling_params: settings.sampling_params,
   });
 }

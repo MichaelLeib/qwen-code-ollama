@@ -44,6 +44,7 @@ export enum AuthType {
   USE_VERTEX_AI = 'vertex-ai',
   CLOUD_SHELL = 'cloud-shell',
   USE_OPENAI = 'openai',
+  USE_OLLAMA = 'ollama',
 }
 
 export type ContentGeneratorConfig = {
@@ -52,6 +53,8 @@ export type ContentGeneratorConfig = {
   vertexai?: boolean;
   authType?: AuthType | undefined;
   enableOpenAILogging?: boolean;
+  // Ollama endpoint URL
+  ollamaEndpoint?: string;
   // Timeout configuration in milliseconds
   timeout?: number;
   // Maximum retries for failed requests
@@ -76,6 +79,7 @@ export async function createContentGeneratorConfig(
   const googleCloudProject = process.env.GOOGLE_CLOUD_PROJECT || undefined;
   const googleCloudLocation = process.env.GOOGLE_CLOUD_LOCATION || undefined;
   const openaiApiKey = process.env.OPENAI_API_KEY;
+  const ollamaEndpoint = process.env.OLLAMA_ENDPOINT;
 
   // Use runtime model from config if available, otherwise fallback to parameter or default
   const effectiveModel = model || DEFAULT_GEMINI_MODEL;
@@ -117,6 +121,13 @@ export async function createContentGeneratorConfig(
   if (authType === AuthType.USE_OPENAI && openaiApiKey) {
     contentGeneratorConfig.apiKey = openaiApiKey;
     contentGeneratorConfig.model = process.env.OPENAI_MODEL || '';
+
+    return contentGeneratorConfig;
+  }
+
+  if (authType === AuthType.USE_OLLAMA && ollamaEndpoint) {
+    contentGeneratorConfig.ollamaEndpoint = ollamaEndpoint;
+    contentGeneratorConfig.model = process.env.OLLAMA_MODEL || model || 'llama3.2:latest';
 
     return contentGeneratorConfig;
   }
@@ -172,6 +183,19 @@ export async function createContentGenerator(
 
     // Always use OpenAIContentGenerator, logging is controlled by enableOpenAILogging flag
     return new OpenAIContentGenerator(config.apiKey, config.model, gcConfig);
+  }
+
+  if (config.authType === AuthType.USE_OLLAMA) {
+    if (!config.ollamaEndpoint) {
+      throw new Error('Ollama endpoint is required');
+    }
+
+    // Import OllamaContentGenerator dynamically to avoid circular dependencies
+    const { OllamaContentGenerator } = await import(
+      './ollamaContentGenerator.js'
+    );
+
+    return new OllamaContentGenerator(config.ollamaEndpoint, config.model, gcConfig);
   }
 
   throw new Error(

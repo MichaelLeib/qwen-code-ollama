@@ -2,7 +2,63 @@
 
 This guide provides solutions to common issues and debugging tips.
 
-## Authentication
+## Ollama Issues
+
+### Connection Problems
+
+- **Error: `Connection refused`**
+  - **Solution**: Start the Ollama service: `ollama serve`
+  - **Verify**: Check if Ollama is running: `curl http://localhost:11434/api/tags`
+  - **Alternative**: Try a different port: `OLLAMA_HOST=0.0.0.0:11435 ollama serve`
+
+- **Error: `No models found`**
+  - **Solution**: Install models: `ollama pull qwen3-coder:latest`
+  - **Verify**: List models: `ollama list`
+  - **Recommended models**: 
+    - `qwen3-coder:latest` for coding tasks
+    - `llama3.2:latest` for general use
+    - `codellama:latest` for code generation
+
+### Performance Issues
+
+- **Slow responses**
+  - Try smaller models: `ollama pull llama3.2:3b`
+  - Check system resources: `htop` or Activity Monitor
+  - Ensure GPU acceleration is working: `nvidia-smi` (NVIDIA) or check Activity Monitor (macOS)
+
+- **Out of memory errors**
+  - Use quantized models (default in Ollama)
+  - Close other memory-intensive applications
+  - Use smaller models like `llama3.2:3b`
+
+- **High CPU usage**
+  - Enable GPU acceleration if available
+  - Reduce parallel requests: `export OLLAMA_NUM_PARALLEL=1`
+  - Consider upgrading hardware
+
+### Configuration Issues
+
+- **Model not detected in Qwen Code**
+  - Restart Qwen Code: `qwen`
+  - Verify model exists: `ollama list`
+  - Check endpoint configuration: `echo $OLLAMA_ENDPOINT`
+
+- **Authentication dialog shows cloud options**
+  - This is normal - Ollama is the default, but cloud APIs are still supported
+  - Select "Ollama" option and configure your endpoint
+
+### Debug Mode
+
+Enable detailed logging:
+
+```bash
+export DEBUG_OLLAMA=true
+qwen --debug
+```
+
+For more Ollama-specific help, see the [Ollama Setup Guide](./ollama-setup.md).
+
+## Authentication (Cloud APIs)
 
 - **Error: `Failed to login. Message: Request contains an invalid argument`**
   - Users with Google Workspace accounts, or users with Google Cloud accounts

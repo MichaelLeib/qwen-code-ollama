@@ -1,6 +1,34 @@
 # CLI Commands
 
-Gemini CLI supports several built-in commands to help you manage your session, customize the interface, and control its behavior. These commands are prefixed with a forward slash (`/`), an at symbol (`@`), or an exclamation mark (`!`).
+Qwen Code CLI supports several built-in commands to help you manage your session, customize the interface, and control its behavior. These commands are prefixed with a forward slash (`/`), an at symbol (`@`), or an exclamation mark (`!`).
+
+## Command Line Options
+
+The CLI supports various options for configuring your session:
+
+### Ollama Configuration
+```bash
+qwen --ollama-endpoint http://localhost:11434    # Specify Ollama server endpoint
+qwen --ollama-model qwen3-coder:latest          # Specify which model to use
+```
+
+### General Options
+```bash
+qwen -m qwen3-coder:latest                      # Model selection (alias for --ollama-model)
+qwen -p "Analyze this codebase"                 # Non-interactive prompt mode
+qwen -i "Start analysis and continue"           # Interactive prompt mode
+qwen --debug                                    # Enable debug mode
+qwen --yolo                                     # Auto-approve all actions
+qwen --sandbox                                  # Run in sandbox mode
+qwen --help                                     # Show all available options
+```
+
+### Environment Variables
+```bash
+export OLLAMA_ENDPOINT="http://localhost:11434"
+export OLLAMA_MODEL="qwen3-coder:latest"
+export DEBUG_OLLAMA="true"                      # Enable Ollama debug logging
+```
 
 ## Slash commands (`/`)
 

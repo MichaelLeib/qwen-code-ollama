@@ -69,7 +69,8 @@ export interface Settings {
   bugCommand?: BugCommandSettings;
   checkpointing?: CheckpointingSettings;
   autoConfigureMaxOldSpaceSize?: boolean;
-  enableOpenAILogging?: boolean;
+  ollamaEndpoint?: string;
+  ollamaModel?: string;
 
   // Git-aware file filtering settings
   fileFiltering?: {
